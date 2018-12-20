@@ -19,6 +19,7 @@ from xblock.exceptions import JsonHandlerError, NoSuchViewError
 from xblock.fragment import Fragment
 from xblock.validation import Validation
 
+from xblockutils.fields import File
 from xblockutils.resources import ResourceLoader
 
 # Globals ###########################################################
@@ -98,6 +99,7 @@ class StudioEditableXBlockMixin(object):
         Create the information that the template needs to render a form field for this field.
         """
         supported_field_types = (
+            (File, 'file'),
             (Integer, 'integer'),
             (Float, 'float'),
             (Boolean, 'boolean'),
@@ -144,7 +146,10 @@ class StudioEditableXBlockMixin(object):
                 break
         if "type" not in info:
             raise NotImplementedError("StudioEditableXBlockMixin currently only supports fields derived from JSONField")
-        if info["type"] in ("list", "set"):
+        if info['type'] == 'file':
+            info['is_set'] = False
+            info['accept'] = field.accept
+        elif info["type"] in ("list", "set"):
             info["value"] = [json.dumps(val) for val in info["value"]]
             info["default"] = json.dumps(info["default"])
         elif info["type"] == "generic":
@@ -196,6 +201,10 @@ class StudioEditableXBlockMixin(object):
             info['list_values'] = list_values
             info['has_list_values'] = True
         return info
+
+    @XBlock.handler
+    def studio_upload_files(self, request, suffix=''):
+        raise NotImplementedError
 
     @XBlock.json_handler
     def submit_studio_edits(self, data, suffix=''):

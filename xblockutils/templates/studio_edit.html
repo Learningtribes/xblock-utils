@@ -56,7 +56,7 @@
               <textarea class="field-data-control" data-field-name="{{field.name}}" id="xb-field-edit-{{field.name}}" rows=10 cols=70>{{field.value}}</textarea>
             {% elif field.type == 'set' and field.has_list_values %}
               {% comment %}
-                TODO: If len(list_values) is high, show an alternate editor 
+                TODO: If len(list_values) is high, show an alternate editor
                 with a select box and a growing list of selected choices
               {% endcomment %}
               <div class="wrapper-list-settings">
@@ -82,6 +82,13 @@
             {% elif field.type == 'generic' or field.type == 'list' or field.type == 'set' %}
               {# Show a textarea so we can edit it as a JSON string #}
               <textarea class="field-data-control" data-field-name="{{field.name}}" id="xb-field-edit-{{field.name}}" rows=5 cols=70>{{field.value}}</textarea>
+            {% elif field.type == 'file'%}
+              <input
+                accept="{{field.accept}}"
+                type="file"
+                class="field-file-control"
+                id="xb-field-edit-{{field.name}}"
+              >
             {% else %}
               Unsupported field type. This setting cannot be edited.
             {% endif %}
