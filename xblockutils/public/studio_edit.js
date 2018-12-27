@@ -1,10 +1,20 @@
 /* Javascript for StudioEditableXBlockMixin. */
 function StudioEditableXBlockMixin(runtime, element) {
     "use strict";
+    function doNothing(attr) {
+        return
+    }
+    var gettext = doNothing;
+    if(!runtime.notify){
+        runtime.notify = doNothing;
+    }
     var fileFields = [];
     var fields = [];
     var tinyMceAvailable = (typeof $.fn.tinymce !== 'undefined'); // Studio includes a copy of tinyMCE and its jQuery plugin
     var datepickerAvailable = (typeof $.fn.datepicker !== 'undefined'); // Studio includes datepicker jQuery plugin
+    if (window.gettext){
+        gettext = window.gettext;
+    }
     $(element).find('.field-file-control').each(function () {
         var $field = $(this);
         var $wrapper = $field.closest('li');
@@ -168,7 +178,6 @@ function StudioEditableXBlockMixin(runtime, element) {
 
     var studio_submit = function (data) {
         var handlerUrl = runtime.handlerUrl(element, 'submit_studio_edits');
-        // runtime.notify('save', {state: 'start', message: gettext("Saving")});
         $.ajax({
             type: "POST",
             url: handlerUrl,
@@ -193,10 +202,12 @@ function StudioEditableXBlockMixin(runtime, element) {
             processData: false,
 
         }).done(success).fail(ajaxFail);
-    }
+    };
 
     $('.save-button', element).bind('click', function (e) {
         e.preventDefault();
+        runtime.notify('save', {state: 'start', message: gettext("Saving")});
+
         var values = {};
         var notSet = []; // List of field names that should be set to default values
         for (var i in fields) {
