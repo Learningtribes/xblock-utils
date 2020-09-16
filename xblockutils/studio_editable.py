@@ -13,6 +13,8 @@ StudioEditableXBlockMixin to your XBlock.
 import json
 import logging
 
+from django.conf import settings
+
 from xblock.core import XBlock
 from xblock.fields import Scope, JSONField, List, Integer, Float, Boolean, String, DateTime
 from xblock.exceptions import JsonHandlerError, NoSuchViewError
