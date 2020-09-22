@@ -13,7 +13,9 @@
             {% if field.type == "file" %}
               <div class="alert-field alert-error hidden" id="alert-field-file" role="alert">
                   <div class="alert-dialog">
-                      <span class="alert-dialog-text alert-error-text" id="alert-error-text">{% trans "The maximum size for an upload is 300 MB." %}</span>
+                      <span class="alert-dialog-text alert-error-text" id="alert-error-text">
+                        {% blocktrans with limit="300" %}SCORM module exceeds maximum size of {{ limit }} MB.{% endblocktrans %}
+                      </span>
                       <span class="btn btn-close" id="alert-field-close"><i class="fa fa-times"></i></span>
                   </div>
               </div>
