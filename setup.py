@@ -88,6 +88,7 @@ setup(
         'XBlock==1.2.9',
         'Mako',
         'futures==3.2.0',
+        'web-fragments==0.2.2',
     ],
     package_data=package_data("xblockutils", ["public", "templates", "templatetags"]),
     url='https://github.com/edx/xblock-utils',
