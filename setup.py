@@ -84,7 +84,11 @@ setup(
     packages=[
         'xblockutils',
     ],
-    install_requires=load_requirements('requirements/base.in'),
+    install_requires=[
+        'XBlock==1.2.9',
+        'Mako',
+        'futures==3.2.0',
+    ],
     package_data=package_data("xblockutils", ["public", "templates", "templatetags"]),
     url='https://github.com/edx/xblock-utils',
 )
