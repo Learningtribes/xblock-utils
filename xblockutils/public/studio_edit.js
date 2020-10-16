@@ -62,7 +62,6 @@ function StudioEditableXBlockMixin(runtime, element) {
     });
 
     $(element).find('#alert-field-close').bind('click', function () {
-        console.log('clicked alert-field-close')
         $('#alert-field-file').addClass('hidden');
     })
 
@@ -179,6 +178,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             });
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
+            $('#alert-field-file').addClass('hidden');
         });
     });
 
