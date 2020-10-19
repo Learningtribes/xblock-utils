@@ -144,6 +144,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         var $checkboxes = $(this).find('input');
         var $wrapper = $optionList.closest('li');
         var $resetButton = $wrapper.find('button.setting-clear');
+        var $alertfield = $(this).find('#alert-field-file')
 
         fields.push({
             name: $wrapper.data('field-name'),
@@ -178,7 +179,8 @@ function StudioEditableXBlockMixin(runtime, element) {
             });
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
-            $('#alert-field-file').addClass('hidden');
+            console.log('$alertfield', $alertfield)
+            $alertfield.addClass('hidden');
         });
     });
 
