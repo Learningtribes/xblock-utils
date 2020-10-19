@@ -43,11 +43,6 @@ function StudioEditableXBlockMixin(runtime, element) {
             if (this.id == 'xb-field-edit-scorm_pkg' && this.files) {
                 var fileSize = this.files[0].size;
                 if(fileSize > 300 * 1024 * 1024) {
-                    // LearningTribes.confirmation.show({
-                    //     message: gettext("The maximum size for an upload is 300 MB."),
-                    //     confirmationText: 'OK',
-                    //     cancelationText: 'Cancel',
-                    // })
                     $('#alert-field-file').removeClass('hidden');
                 }
             }
@@ -57,7 +52,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             $field.val($wrapper.attr('data-default')); // Use attr instead of data to force treating the default value as a string
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
-            $('#alert-field-file').removeClass('hidden');
+            $('#alert-field-file').addClass('hidden');
         });
     });
 
@@ -110,6 +105,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             $field.val($wrapper.attr('data-default')); // Use attr instead of data to force treating the default value as a string
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
+            $('#alert-field-file').addClass('hidden');
 
         });
         if (type == 'html' && tinyMceAvailable) {
@@ -144,7 +140,6 @@ function StudioEditableXBlockMixin(runtime, element) {
         var $checkboxes = $(this).find('input');
         var $wrapper = $optionList.closest('li');
         var $resetButton = $wrapper.find('button.setting-clear');
-        var $alertfield = $(this).find('#alert-field-file')
 
         fields.push({
             name: $wrapper.data('field-name'),
@@ -179,8 +174,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             });
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
-            console.log('$alertfield', $alertfield)
-            $alertfield.addClass('hidden');
+            $('#alert-field-file').addClass('hidden');
         });
     });
 
