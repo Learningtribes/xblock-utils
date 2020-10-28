@@ -5,6 +5,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         return
     }
     var gettext = doNothing;
+    var Learningtribes = doNothing;
     if(!runtime.notify){
         runtime.notify = doNothing;
     }
@@ -14,6 +15,9 @@ function StudioEditableXBlockMixin(runtime, element) {
     var datepickerAvailable = (typeof $.fn.datepicker !== 'undefined'); // Studio includes datepicker jQuery plugin
     if (window.gettext){
         gettext = window.gettext;
+    }
+    if (window.Learningtribes){
+        Learningtribes = window.Learningtribes;
     }
     $(element).find('.field-file-control').each(function () {
         var $field = $(this);
@@ -35,14 +39,27 @@ function StudioEditableXBlockMixin(runtime, element) {
             // Field value has been modified:
             $wrapper.addClass('is-set');
             $resetButton.removeClass('inactive').addClass('active');
+
+            if (this.id == 'xb-field-edit-scorm_pkg' && this.files) {
+                var fileSize = this.files[0].size;
+                if(fileSize > 300 * 1024 * 1024) {
+                    $('#alert-field-file').removeClass('hidden');
+                }
+            }
         };
         $field.bind("change input paste", fieldChanged);
         $resetButton.click(function () {
             $field.val($wrapper.attr('data-default')); // Use attr instead of data to force treating the default value as a string
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
+            $('#alert-field-file').addClass('hidden');
         });
     });
+
+    $(element).find('#alert-field-close').bind('click', function () {
+        $('#alert-field-file').addClass('hidden');
+    })
+
     $(element).find('.field-data-control').each(function () {
         var $field = $(this);
         var $wrapper = $field.closest('li');
@@ -88,6 +105,8 @@ function StudioEditableXBlockMixin(runtime, element) {
             $field.val($wrapper.attr('data-default')); // Use attr instead of data to force treating the default value as a string
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
+            $('#alert-field-file').addClass('hidden');
+
         });
         if (type == 'html' && tinyMceAvailable) {
             tinyMCE.baseURL = baseUrl + "/js/vendor/tinymce/js/tinymce";
@@ -155,6 +174,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             });
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
+            $('#alert-field-file').addClass('hidden');
         });
     });
 

@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="editor-with-buttons">
   <div class="wrapper-comp-settings is-active editor-with-buttons" id="settings-tab">
-    <ul class="list-input settings-list">
+    <div class="list-input settings-list">
       {% for field in fields %}
         <li
           class="field comp-setting-entry metadata_entry {% if field.is_set %}is-set{% endif %}"
@@ -10,6 +10,16 @@
           data-cast="{{field.type}}"
         >
           <div class="wrapper-comp-setting{% if field.type == "set" %} metadata-list-enum {%endif%}">
+            {% if field.type == "file" %}
+              <div class="alert-field alert-error hidden" id="alert-field-file" role="alert">
+                  <div class="alert-dialog">
+                      <span class="alert-dialog-text alert-error-text" id="alert-error-text">
+                        {% blocktrans with limit="300" %}SCORM module exceeds maximum size of {{ limit }} MB.{% endblocktrans %}
+                      </span>
+                      <span class="btn btn-close" id="alert-field-close"><i class="fa fa-times"></i></span>
+                  </div>
+              </div>
+            {% endif %}
             <label class="label setting-label" for="xb-field-edit-{{field.name}}">{{field.display_name}}</label>
 
             {% if field.type == "boolean" %}
@@ -82,13 +92,14 @@
             {% elif field.type == 'generic' or field.type == 'list' or field.type == 'set' %}
               {# Show a textarea so we can edit it as a JSON string #}
               <textarea class="field-data-control" data-field-name="{{field.name}}" id="xb-field-edit-{{field.name}}" rows=5 cols=70>{{field.value}}</textarea>
+            <span>
             {% elif field.type == 'file'%}
-              <input
-                accept="{{field.accept}}"
-                type="file"
-                class="field-file-control"
-                id="xb-field-edit-{{field.name}}"
-              >
+                <input
+                  accept="{{field.accept}}"
+                  type="file"
+                  class="field-file-control"
+                  id="xb-field-edit-{{field.name}}"
+                >
             {% else %}
               Unsupported field type. This setting cannot be edited.
             {% endif %}
@@ -98,13 +109,18 @@
                 <i class="icon fa fa-undo"></i><span class="sr">{% trans "Clear Value" %}</span>
               </button>
             {% endif %}
+            </span>
           </div>
           {% if field.help %}
-            <span class="tip setting-help"> {{ field.help|safe }} </span>
+            <span class="tip setting-help {% if field.name == 'scorm_pkg' %}scorm-setting-help{% endif %}"> {{ field.help|safe }} </span>
+          {% endif %}
+          {% if field.name == 'scorm_pkg' %}
+            <span class="setting-file-weight-info">
+              {% trans "Size limit: " %}300 MB
+            </span>
           {% endif %}
         </li>
       {% endfor %}
-    </ul>
   </div>
   <div class="xblock-actions">
     <ul>

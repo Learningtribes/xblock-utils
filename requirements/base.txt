@@ -20,4 +20,4 @@ six==1.11.0               # via fs, python-dateutil, xblock
 typing==3.6.4             # via fs
 web-fragments==0.2.2      # via xblock
 webob==1.8.2              # via xblock
-xblock==1.2.1
+Xblock==1.2.9
