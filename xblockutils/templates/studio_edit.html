@@ -34,6 +34,7 @@
                   False {% if not field.default %}&nbsp;&nbsp;&nbsp;&nbsp;(Default){% endif %}
                 </option>
               </select>
+                <span class="switcher-wrapper"></span>
             {% elif field.has_values %}
               <select
                 class="field-data-control"
@@ -103,6 +104,9 @@
             {% else %}
               Unsupported field type. This setting cannot be edited.
             {% endif %}
+                {% if field.help %}
+                <span class="question-mark-wrapper" data-title="{{ field.help|safe }}{% if field.name == 'scorm_pkg' %}; {% trans "Size limit: " %}300 MB{% endif %} "></span>
+              {% endif %}
 
             {% if field.allow_reset %}
               <button class="action setting-clear {% if field.is_set %}active{%else%}inactive{% endif %}" type="button" name="setting-clear" value="{% trans "Clear" %}" data-tooltip="{% trans "Clear" %}">
@@ -125,11 +129,11 @@
   <div class="xblock-actions">
     <ul>
       <li class="action-item">
-        <a href="#" class="button action-primary save-button">{% trans "Save" %}</a>
+        <a href="#" class="button cancel-button">{% trans "Cancel" %}</a>
       </li>
 
       <li class="action-item">
-        <a href="#" class="button cancel-button">{% trans "Cancel" %}</a>
+        <a href="#" class="button action-primary save-button">{% trans "Save" %}</a>
       </li>
     </ul>
   </div>

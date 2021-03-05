@@ -106,7 +106,6 @@ function StudioEditableXBlockMixin(runtime, element) {
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
             $('#alert-field-file').addClass('hidden');
-
         });
         if (type == 'html' && tinyMceAvailable) {
             tinyMCE.baseURL = baseUrl + "/js/vendor/tinymce/js/tinymce";
@@ -274,4 +273,31 @@ function StudioEditableXBlockMixin(runtime, element) {
         e.preventDefault();
         runtime.notify('cancel', {});
     });
+
+    if (LearningTribes && LearningTribes.QuestionMark) {
+        var $wrappers = $('.wrapper-comp-settings .question-mark-wrapper')
+        $wrappers.each(function(i, wrapper){
+            new LearningTribes.QuestionMark(wrapper)
+        })
+    }
+
+    function renderSwithcher(wrapper) {
+        var $select = $(wrapper).prev();
+        new LearningTribes.Switcher(wrapper, $select.find('option:selected').val() === '1' ? 'true' : 'false',
+            function(checked){
+            var checkedStr = checked ? '1' : '0';
+            $select.find('option').removeAttr('selected')
+            $select.find('option[value='+checkedStr+']')
+                .attr('selected', 'selected')
+            }
+        )
+        var $li = $select.closest('.field')
+        $li.addClass('is-set')
+    }
+    if (LearningTribes && LearningTribes.Switcher) {
+        var $wrappers = $('.wrapper-comp-settings').find('.switcher-wrapper');
+        $wrappers.each(function(i, wrapper){
+            renderSwithcher(wrapper)
+        })
+    }
 }
