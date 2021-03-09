@@ -261,7 +261,8 @@ function StudioEditableXBlockMixin(runtime, element) {
 
     });
 
-    $(element).find('.cancel-button').bind('click', function (e) {
+    var $element = $(element);
+    $element.find('.cancel-button').bind('click', function (e) {
         // Remove TinyMCE instances to make sure jQuery does not try to access stale instances
         // when loading editor for another block:
         for (var i in fields) {
@@ -274,6 +275,10 @@ function StudioEditableXBlockMixin(runtime, element) {
         runtime.notify('cancel', {});
     });
 
+    $element.find('[data-field-name=scorm_pkg] input[type=file]').on('change', function(e){
+        var selectedFile = e.target.files[0] || null;
+        $(e.currentTarget).siblings('.info').text(selectedFile.name);
+    })
     if (LearningTribes && LearningTribes.QuestionMark) {
         var $wrappers = $('.wrapper-comp-settings .question-mark-wrapper')
         $wrappers.each(function(i, wrapper){
