@@ -54,6 +54,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             $resetButton.removeClass('active').addClass('inactive');
             $('#alert-field-file').addClass('hidden');
         });
+        $field.parent().on('drop', fieldChanged)
     });
 
     $(element).find('#alert-field-close').bind('click', function () {
