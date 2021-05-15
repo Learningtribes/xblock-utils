@@ -223,6 +223,31 @@ function StudioEditableXBlockMixin(runtime, element) {
         }).done(success).fail(ajaxFail);
     };
 
+    //quick fixing, it should rewrite in a better way
+    var preventDefault = function(event) {
+        event.preventDefault();
+    };
+    $(window).on('dragover', preventDefault);
+    $(window).on('drop', preventDefault);
+
+    var $fileControl = $('.field-file-control-wrapper', element)
+    $fileControl.on('allowDrop', function(ev){
+        ev.preventDefault();
+    })
+    $fileControl.on('drag', function(ev){
+        ev.dataTransfer.setData("text", ev.target.id);
+    })
+    $fileControl.on('drop', function(ev){
+        ev.preventDefault();
+        var $file = $fileControl.find('input[type=file]')
+        $file[0].files = ev.originalEvent.dataTransfer.files
+        var fileInstance0 = $file[0].files[0]
+        var selectedFile = fileInstance0 || null;
+        $('.info',element).text(selectedFile.name);
+    })
+    //quick fixing end
+
+
     $('.save-button', element).bind('click', function (e) {
         e.preventDefault();
         runtime.notify('save', {state: 'start', message: gettext("Saving")});
