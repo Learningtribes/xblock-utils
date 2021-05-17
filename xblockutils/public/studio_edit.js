@@ -54,6 +54,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             $resetButton.removeClass('active').addClass('inactive');
             $('#alert-field-file').addClass('hidden');
         });
+        $field.parent().on('drop', fieldChanged)
     });
 
     $(element).find('#alert-field-close').bind('click', function () {
@@ -223,6 +224,31 @@ function StudioEditableXBlockMixin(runtime, element) {
         }).done(success).fail(ajaxFail);
     };
 
+    //quick fixing, it should rewrite in a better way
+    var preventDefault = function(event) {
+        event.preventDefault();
+    };
+    $(window).on('dragover', preventDefault);
+    $(window).on('drop', preventDefault);
+
+    var $fileControl = $('.field-file-control-wrapper', element)
+    $fileControl.on('allowDrop', function(ev){
+        ev.preventDefault();
+    })
+    $fileControl.on('drag', function(ev){
+        ev.dataTransfer.setData("text", ev.target.id);
+    })
+    $fileControl.on('drop', function(ev){
+        ev.preventDefault();
+        var $file = $fileControl.find('input[type=file]')
+        $file[0].files = ev.originalEvent.dataTransfer.files
+        var fileInstance0 = $file[0].files[0]
+        var selectedFile = fileInstance0 || null;
+        $('.info',element).text(selectedFile.name);
+    })
+    //quick fixing end
+
+
     $('.save-button', element).bind('click', function (e) {
         e.preventDefault();
         runtime.notify('save', {state: 'start', message: gettext("Saving")});
@@ -261,7 +287,8 @@ function StudioEditableXBlockMixin(runtime, element) {
 
     });
 
-    $(element).find('.cancel-button').bind('click', function (e) {
+    var $element = $(element);
+    $element.find('.cancel-button').bind('click', function (e) {
         // Remove TinyMCE instances to make sure jQuery does not try to access stale instances
         // when loading editor for another block:
         for (var i in fields) {
@@ -274,6 +301,10 @@ function StudioEditableXBlockMixin(runtime, element) {
         runtime.notify('cancel', {});
     });
 
+    $element.find('[data-field-name=scorm_pkg] input[type=file]').on('change', function(e){
+        var selectedFile = e.target.files[0] || null;
+        $(e.currentTarget).siblings('.info').text(selectedFile.name);
+    })
     if (LearningTribes && LearningTribes.QuestionMark) {
         var $wrappers = $('.wrapper-comp-settings .question-mark-wrapper')
         $wrappers.each(function(i, wrapper){

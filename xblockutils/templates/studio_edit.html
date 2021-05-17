@@ -95,12 +95,19 @@
               <textarea class="field-data-control" data-field-name="{{field.name}}" id="xb-field-edit-{{field.name}}" rows=5 cols=70>{{field.value}}</textarea>
             <span>
             {% elif field.type == 'file'%}
-                <input
-                  accept="{{field.accept}}"
-                  type="file"
-                  class="field-file-control"
-                  id="xb-field-edit-{{field.name}}"
-                >
+                <span class="field-file-control-wrapper">
+                    <input id="field-file-control"
+                      accept="{{field.accept}}"
+                      type="file"
+                      class="field-file-control"
+                      id="xb-field-edit-{{field.name}}"
+                    >
+                    <span class="dangerous">Drag & Drop</span>
+                    <span class="normal">or</span>
+                    <label class="browse" for="field-file-control">Select from your computer</label>
+                    <span class="info"></span>
+
+                </span>
             {% else %}
               Unsupported field type. This setting cannot be edited.
             {% endif %}
