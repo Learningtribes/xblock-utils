@@ -23,6 +23,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         var $field = $(this);
         var $wrapper = $field.closest('li');
         var $resetButton = $wrapper.find('button.setting-clear');
+        var $preview = $wrapper.find('.setting-preview')
         fileFields.push({
             name: $wrapper.data('field-name'),
             isSet: function () {
@@ -42,9 +43,16 @@ function StudioEditableXBlockMixin(runtime, element) {
 
             if (this.id == 'xb-field-edit-scorm_pkg' && this.files) {
                 var fileSize = this.files[0].size;
-                if(fileSize > 300 * 1024 * 1024) {
+                if (fileSize > 300 * 1024 * 1024) {
                     $('#alert-field-file').removeClass('hidden');
+                } else {
+                    $('#alert-field-file').addClass('hidden')
                 }
+            }
+
+            if (this.accept && this.accept.startsWith('image/') && this.files) {
+                var imageUrl = URL.createObjectURL(this.files[0]);
+                $preview.html('<img src="' + imageUrl + '" alt="Preview" />');
             }
         };
         $field.bind("change input paste", fieldChanged);
@@ -53,6 +61,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
             $('#alert-field-file').addClass('hidden');
+            $preview.html('');
         });
         $field.parent().on('drop', fieldChanged)
     });
@@ -315,11 +324,11 @@ function StudioEditableXBlockMixin(runtime, element) {
     function renderSwithcher(wrapper) {
         var $select = $(wrapper).prev();
         new LearningTribes.Switcher(wrapper, $select.find('option:selected').val() === '1' ? 'true' : 'false',
-            function(checked){
-            var checkedStr = checked ? '1' : '0';
-            $select.find('option').removeAttr('selected')
-            $select.find('option[value='+checkedStr+']')
-                .attr('selected', 'selected')
+            function (checked) {
+                var checkedStr = checked ? '1' : '0';
+                $select.find('option').removeAttr('selected')
+                $select.find('option[value='+checkedStr+']').attr('selected', 'selected')
+                $select.closest('.comp-setting-entry').attr('data-value', checked ? 'true' : 'false')
             }
         )
         var $li = $select.closest('.field')
