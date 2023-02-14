@@ -63,7 +63,16 @@ function StudioEditableXBlockMixin(runtime, element) {
             $('#alert-field-file').addClass('hidden');
             $preview.html('');
         });
-        $field.parent().on('drop', fieldChanged)
+
+        $field.parent().on('allowDrop', function (e) {e.preventDefault()})
+        $field.parent().on('drag', function (e) {e.dataTransfer.setData("text", e.target.id)})
+        $field.parent().on('drop', function (e) {
+            e.preventDefault();
+            $field.files = e.originalEvent.dataTransfer.files
+            var selectedFile = $field.files[0] || {};
+            fieldChanged();
+            $field.siblings('.info').text(selectedFile.name || '');
+        })
     });
 
     $(element).find('#alert-field-close').bind('click', function () {
@@ -233,30 +242,8 @@ function StudioEditableXBlockMixin(runtime, element) {
         }).done(success).fail(ajaxFail);
     };
 
-    //quick fixing, it should rewrite in a better way
-    var preventDefault = function(event) {
-        event.preventDefault();
-    };
-    $(window).on('dragover', preventDefault);
-    $(window).on('drop', preventDefault);
-
-    var $fileControl = $('.field-file-control-wrapper', element)
-    $fileControl.on('allowDrop', function(ev){
-        ev.preventDefault();
-    })
-    $fileControl.on('drag', function(ev){
-        ev.dataTransfer.setData("text", ev.target.id);
-    })
-    $fileControl.on('drop', function(ev){
-        ev.preventDefault();
-        var $file = $fileControl.find('input[type=file]')
-        $file[0].files = ev.originalEvent.dataTransfer.files
-        var fileInstance0 = $file[0].files[0]
-        var selectedFile = fileInstance0 || null;
-        $('.info',element).text(selectedFile.name);
-    })
-    //quick fixing end
-
+    $(window).on('dragover', function(e) {e.preventDefault();});
+    $(window).on('drop', function(e) {e.preventDefault();});
 
     $('.save-button', element).bind('click', function (e) {
         e.preventDefault();
@@ -311,7 +298,7 @@ function StudioEditableXBlockMixin(runtime, element) {
     });
 
     $element.find('[data-field-name=scorm_pkg] input[type=file]').on('change', function(e){
-        var selectedFile = e.target.files[0] || null;
+        var selectedFile = e.target.files[0] || {};
         $(e.currentTarget).siblings('.info').text(selectedFile.name);
     })
     if (LearningTribes && LearningTribes.QuestionMark) {
