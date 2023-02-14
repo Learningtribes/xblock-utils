@@ -70,7 +70,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             e.preventDefault();
             $field.files = e.originalEvent.dataTransfer.files
             var selectedFile = $field.files[0] || {};
-            fieldChanged();
+            fieldChanged.apply($field);
             $field.siblings('.info').text(selectedFile.name || '');
         })
     });
