@@ -24,6 +24,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         var $wrapper = $field.closest('li');
         var $resetButton = $wrapper.find('button.setting-clear');
         var $preview = $wrapper.find('.setting-preview')
+        var $info = $wrapper.find('.info')
         fileFields.push({
             name: $wrapper.data('field-name'),
             isSet: function () {
@@ -61,6 +62,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
             $('#alert-field-file').addClass('hidden');
+            $info.text('');
             $preview.html('');
         });
 
@@ -68,10 +70,8 @@ function StudioEditableXBlockMixin(runtime, element) {
         $field.parent().on('drag', function (e) {e.dataTransfer.setData("text", e.target.id)})
         $field.parent().on('drop', function (e) {
             e.preventDefault();
-            $field.files = e.originalEvent.dataTransfer.files
-            var selectedFile = $field.files[0] || {};
-            fieldChanged.apply($field);
-            $field.siblings('.info').text(selectedFile.name || '');
+            $field.prop('files', e.originalEvent.dataTransfer.files).change();
+            $info.text((e.originalEvent.dataTransfer.files[0] || {}).name || '');
         })
     });
 
