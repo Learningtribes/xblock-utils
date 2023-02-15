@@ -4,8 +4,8 @@ function StudioEditableXBlockMixin(runtime, element) {
     function doNothing(attr) {
         return
     }
-    var gettext = doNothing;
-    var Learningtribes = doNothing;
+    var gettext = window.gettext || function (t) {return t};
+    var LearningTribes = window.LearningTribes || {};
     if(!runtime.notify){
         runtime.notify = doNothing;
     }
@@ -13,12 +13,7 @@ function StudioEditableXBlockMixin(runtime, element) {
     var fields = [];
     var tinyMceAvailable = (typeof $.fn.tinymce !== 'undefined'); // Studio includes a copy of tinyMCE and its jQuery plugin
     var datepickerAvailable = (typeof $.fn.datepicker !== 'undefined'); // Studio includes datepicker jQuery plugin
-    if (window.gettext){
-        gettext = window.gettext;
-    }
-    if (window.Learningtribes){
-        Learningtribes = window.Learningtribes;
-    }
+
     $(element).find('.field-file-control').each(function () {
         var $field = $(this);
         var $wrapper = $field.closest('li');
