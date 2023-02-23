@@ -102,6 +102,7 @@
                       type="file"
                       class="field-file-control"
                       id="xb-field-edit-{{field.name}}"
+                      data-value="{{ field.value }}"
                     >
                     <span class="dangerous">Drag & Drop</span>
                     <span class="normal">or</span>
@@ -128,11 +129,15 @@
           {% if field.help %}
             <span class="tip setting-help"> {{ field.help|safe }} </span>
           {% endif %}
+          {% if field.type == 'file' and field.accept == 'image/*' %}
             <div class="setting-preview">
-              {% if field.type == 'file' and field.accept == 'image/*' and field.value %}
-                <img src="{{field.value}}" alt="{{field.name|safe}}"  />
-              {% endif %}
+              <!-- <img class="value" src="{{ field.value }}" alt="{{ field.name|safe }}" /> -->
+
+              {% for optional_value in field.optional_values %}
+                <img class="option" src="{{ optional_value }}" alt="{{ optional_value }}"  />
+              {% endfor %}
             </div>
+          {% endif %}
         </li>
       {% endfor %}
   </div>

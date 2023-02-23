@@ -9,7 +9,6 @@ function StudioEditableXBlockMixin(runtime, element) {
     if(!runtime.notify){
         runtime.notify = doNothing;
     }
-    var fileFields = [];
     var fields = [];
     var tinyMceAvailable = (typeof $.fn.tinymce !== 'undefined'); // Studio includes a copy of tinyMCE and its jQuery plugin
     var datepickerAvailable = (typeof $.fn.datepicker !== 'undefined'); // Studio includes datepicker jQuery plugin
@@ -19,8 +18,12 @@ function StudioEditableXBlockMixin(runtime, element) {
         var $wrapper = $field.closest('li');
         var $resetButton = $wrapper.find('button.setting-clear');
         var $preview = $wrapper.find('.setting-preview')
+        var $options = $preview.find('.option')
         var $info = $wrapper.find('.info')
-        fileFields.push({
+
+        var optionUrls = Array.from($options.map($option => $option.src))
+
+        fields.push({
             name: $wrapper.data('field-name'),
             isSet: function () {
                 return $wrapper.hasClass('is-set');
@@ -29,13 +32,17 @@ function StudioEditableXBlockMixin(runtime, element) {
                 return false;
             },
             val: function () {
-                return $field.prop('files')[0];
+                return $field.data('value')
+            },
+            file: function () {
+                return $field.prop('files')[0]
             },
         });
         var fieldChanged = function () {
             // Field value has been modified:
             $wrapper.addClass('is-set');
             $resetButton.removeClass('inactive').addClass('active');
+            $info.text((this.files && this.files[0]) ? this.files[0].name : '');
 
             if (this.id == 'xb-field-edit-scorm_pkg' && this.files) {
                 var fileSize = this.files[0].size;
@@ -47,18 +54,19 @@ function StudioEditableXBlockMixin(runtime, element) {
             }
 
             if (this.accept && this.accept.startsWith('image/') && this.files) {
-                var imageUrl = URL.createObjectURL(this.files[0]);
-                $preview.html('<img src="' + imageUrl + '" alt="Preview" />');
+                renderFieldValuePreview(URL.createObjectURL(this.files[0]))
             }
         };
         $field.bind("change input paste", fieldChanged);
         $resetButton.click(function () {
             $field.val($wrapper.attr('data-default')); // Use attr instead of data to force treating the default value as a string
+            $field.data('value', undefined)
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
             $('#alert-field-file').addClass('hidden');
             $info.text('');
-            $preview.html('');
+            $preview.find('.value').remove()
+            $preview.find('.option').removeClass('active')
         });
 
         $field.parent().on('allowDrop', function (e) {e.preventDefault()})
@@ -68,6 +76,30 @@ function StudioEditableXBlockMixin(runtime, element) {
             $field.prop('files', e.originalEvent.dataTransfer.files).change();
             $info.text((e.originalEvent.dataTransfer.files[0] || {}).name || '');
         })
+
+        $preview.find('.option').on('click', function () {
+            var imageUrl = $(this).src
+            $field.val(undefined).change()
+            $field.data('value', imageUrl)
+            renderFieldValuePreview(imageUrl)
+        })
+
+        function renderFieldValuePreview (imageUrl) {
+            if (!imageUrl) return
+
+            if (optionUrls.includes(imageUrl)) {
+                $options.each($option => {
+                    if ($option.src == imageUrl) $option.addClass('active')
+                    else $option.removeClass('active')
+                })
+            } else {
+                var $img = $preview.find('.value')
+                if ($img.length) $img.attr('src', imageUrl)
+                else $preview.prepend('<img class="value" src="' + imageUrl + '">')
+            }
+        }
+
+        renderFieldValuePreview($field.data('value'))
     });
 
     $(element).find('#alert-field-close').bind('click', function () {
@@ -233,7 +265,6 @@ function StudioEditableXBlockMixin(runtime, element) {
             cache: false,
             contentType: false,
             processData: false,
-
         }).done(success).fail(ajaxFail);
     };
 
@@ -246,36 +277,37 @@ function StudioEditableXBlockMixin(runtime, element) {
 
         var values = {};
         var notSet = []; // List of field names that should be set to default values
+        const fileForm = new FormData()
         for (var i in fields) {
             var field = fields[i];
-            if (field.isSet()) {
-                values[field.name] = field.val();
+
+            if (field.file) {
+                const file = field.file();
+                if (file) {
+                    fileForm.append(field.name, file)
+                } else if (field.isSet()) {
+                    values[field.name] = field.val()
+                }
             } else {
-                notSet.push(field.name);
+                if (field.isSet()) {
+                    values[field.name] = field.val()
+                } else {
+                    notSet.push(field.name)
+                }
             }
+
             // Remove TinyMCE instances to make sure jQuery does not try to access stale instances
             // when loading editor for another block:
             if (field.hasEditor()) {
                 field.removeEditor();
             }
         }
-        if(fileFields.length > 0) {
-            var form = new FormData();
-            for (var i in fileFields) {
-                var field = fileFields[i];
-                if (field.isSet()) {
-                    form.append(field.name, field.val())
-                }
-            }
-            if (Array.from(form.entries()).length > 0) {
-                upload_files(form, function () {
-                    studio_submit({values: values, defaults: notSet});
-                });
-                return
-            }
-        }
-        studio_submit({values: values, defaults: notSet});
 
+        if (Array.from(fileForm.entries()).length > 0) {
+            upload_files(fileForm, () => studio_submit({values, defaults: notSet}))
+        } else {
+            studio_submit({values, defaults: notSet})
+        }
     });
 
     var $element = $(element);
@@ -292,10 +324,6 @@ function StudioEditableXBlockMixin(runtime, element) {
         runtime.notify('cancel', {});
     });
 
-    $element.find('[data-field-name=scorm_pkg] input[type=file]').on('change', function(e){
-        var selectedFile = e.target.files[0] || {};
-        $(e.currentTarget).siblings('.info').text(selectedFile.name);
-    })
     if (LearningTribes && LearningTribes.QuestionMark) {
         var $wrappers = $('.wrapper-comp-settings .question-mark-wrapper')
         $wrappers.each(function(i, wrapper){
