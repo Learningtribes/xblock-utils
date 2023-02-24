@@ -126,7 +126,7 @@
                 <span class="setting-description">{{ field.extra_description|safe }}</span>
             {% endif %}
           </div>
-          {% if field.help %}
+          {% if field.help and field.type != 'file' %}
             <span class="tip setting-help"> {{ field.help|safe }} </span>
           {% endif %}
           {% if field.type == 'file' and field.accept == 'image/*' %}
