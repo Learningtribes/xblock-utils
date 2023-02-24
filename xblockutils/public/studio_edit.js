@@ -42,10 +42,11 @@ function StudioEditableXBlockMixin(runtime, element) {
             // Field value has been modified:
             $wrapper.addClass('is-set');
             $resetButton.removeClass('inactive').addClass('active');
-            $info.text((this.files && this.files[0]) ? this.files[0].name : '');
+            const file = this.files && this.files[0]
+            $info.text(file ? file.name : '');
 
-            if (this.id == 'xb-field-edit-scorm_pkg' && this.files) {
-                var fileSize = this.files[0].size;
+            if (this.id == 'xb-field-edit-scorm_pkg' && file) {
+                var fileSize = file.size;
                 if (fileSize > 300 * 1024 * 1024) {
                     $('#alert-field-file').removeClass('hidden');
                 } else {
@@ -53,8 +54,8 @@ function StudioEditableXBlockMixin(runtime, element) {
                 }
             }
 
-            if (this.accept && this.accept.startsWith('image/') && this.files) {
-                renderFieldValuePreview(URL.createObjectURL(this.files[0]))
+            if (this.accept && this.accept.startsWith('image/') && file) {
+                renderFieldValuePreview(URL.createObjectURL(file))
             }
         };
         $field.bind("change input paste", fieldChanged);
