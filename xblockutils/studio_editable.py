@@ -151,6 +151,8 @@ class StudioEditableXBlockMixin(object):
         if info['type'] == 'file':
             info['is_set'] = False
             info['accept'] = field.accept
+            info['extra_description'] = field.extra_description
+            info['optional_values'] = field.optional_values
         elif info["type"] in ("list", "set"):
             info["value"] = [json.dumps(val) for val in info["value"]]
             info["default"] = json.dumps(info["default"])
