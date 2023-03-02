@@ -21,7 +21,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         var $options = $preview.find('.option')
         var $info = $wrapper.find('.info')
 
-        var optionUrls = Array.from($options.map($option => $option.src))
+        var optionUrls = Array.from($options).map($option => $option.alt)
 
         fields.push({
             name: $wrapper.data('field-name'),
@@ -79,7 +79,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         })
 
         $preview.find('.option').on('click', function () {
-            var imageUrl = $(this).src
+            var imageUrl = this.alt
             $field.val(undefined).change()
             $field.data('value', imageUrl)
             renderFieldValuePreview(imageUrl)
@@ -89,9 +89,9 @@ function StudioEditableXBlockMixin(runtime, element) {
             if (!imageUrl) return
 
             if (optionUrls.includes(imageUrl)) {
-                $options.each($option => {
-                    if ($option.src == imageUrl) $option.addClass('active')
-                    else $option.removeClass('active')
+                $options.each(function () {
+                    if (this.alt == imageUrl) this.classList.add('active')
+                    else this.classList.remove('active')
                 })
             } else {
                 var $img = $preview.find('.value')

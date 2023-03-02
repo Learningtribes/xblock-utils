@@ -134,7 +134,9 @@
               <!-- <img class="value" src="{{ field.value }}" alt="{{ field.name|safe }}" /> -->
 
               {% for optional_value in field.optional_values %}
-                <img class="option" src="{{ optional_value }}" alt="{{ optional_value }}"  />
+                <div class="option-wrapper">
+                    <img class="option" src="{{ optional_value }}" alt="{{ optional_value }}" />
+                </div>
               {% endfor %}
             </div>
           {% endif %}
