@@ -136,6 +136,8 @@
               {% for optional_value in field.optional_values %}
                 <div class="option-wrapper">
                     <img class="option" src="{{ optional_value }}" alt="{{ optional_value }}" />
+                    <i class="icon icon--active fa-solid fa-circle-check"></i>
+                    <i class="icon icon--inactive fa-solid fa-circle-minus"></i>
                 </div>
               {% endfor %}
             </div>
