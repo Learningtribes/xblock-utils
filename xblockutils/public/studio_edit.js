@@ -88,10 +88,13 @@ function StudioEditableXBlockMixin(runtime, element) {
         function renderFieldValuePreview (imageUrl) {
             if (!imageUrl) return
 
+            $options.each(function () {
+                this.classList.remove('active')
+            })
+
             if (optionUrls.includes(imageUrl)) {
                 $options.each(function () {
                     if (this.alt == imageUrl) this.classList.add('active')
-                    else this.classList.remove('active')
                 })
             } else {
                 var $img = $preview.find('.value')
