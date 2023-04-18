@@ -35,7 +35,7 @@ function StudioEditableXBlockMixin(runtime, element) {
                 return $field.prop('files')[0]
             },
             files: function () {
-                return $field[0].querySelectorAll('.option-input').map(function ($option) {
+                return Array.from($field[0].querySelectorAll('.option-input')).map(function ($option) {
                     return $option.src
                 })
             },
