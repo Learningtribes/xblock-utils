@@ -18,10 +18,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         var $wrapper = $field.closest('li');
         var $resetButton = $wrapper.find('button.setting-clear');
         var $preview = $wrapper.find('.setting-preview')
-        var $options = $preview.find('.option')
         var $info = $wrapper.find('.info')
-
-        var optionUrls = Array.from($options).map($option => $option.alt)
 
         fields.push({
             name: $wrapper.data('field-name'),
@@ -37,12 +34,17 @@ function StudioEditableXBlockMixin(runtime, element) {
             file: function () {
                 return $field.prop('files')[0]
             },
+            files: function () {
+                return $field[0].querySelectorAll('.option-input').map(function ($option) {
+                    return $option.src
+                })
+            },
         });
-        var fieldChanged = function () {
+        $field.bind("change input paste", function () {
             // Field value has been modified:
             $wrapper.addClass('is-set');
             $resetButton.removeClass('inactive').addClass('active');
-            const file = this.files && this.files[0]
+            var file = this.files && this.files[0]
             $info.text(file ? file.name : '');
 
             if (this.id == 'xb-field-edit-scorm_pkg' && file) {
@@ -57,17 +59,14 @@ function StudioEditableXBlockMixin(runtime, element) {
             if (this.accept && this.accept.startsWith('image/') && file) {
                 renderFieldValuePreview(URL.createObjectURL(file))
             }
-        };
-        $field.bind("change input paste", fieldChanged);
+        });
         $resetButton.click(function () {
-            $field.val($wrapper.attr('data-default')); // Use attr instead of data to force treating the default value as a string
-            $field.data('value', undefined)
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
             $('#alert-field-file').addClass('hidden');
             $info.text('');
-            $preview.find('.value').remove()
             $preview.find('.option').removeClass('active')
+            setFieldValue($wrapper.attr('data-default'))
         });
 
         $field.parent().on('allowDrop', function (e) {e.preventDefault()})
@@ -79,14 +78,16 @@ function StudioEditableXBlockMixin(runtime, element) {
         })
 
         $preview.find('.option').on('click', function () {
-            var imageUrl = this.alt
-            $field.val(undefined).change()
-            $field.data('value', imageUrl)
-            renderFieldValuePreview(imageUrl)
+            $wrapper.addClass('is-set')
+            $resetButton.addClass('active').removeClass('inactive')
+            setFieldValue(this.alt)
         })
 
         function renderFieldValuePreview (imageUrl) {
             if (!imageUrl) return
+
+            var $options = $preview.find('.option')
+            var optionUrls = Array.from($options).map(function ($option) {return $option.alt})
 
             $options.each(function () {
                 this.classList.remove('active')
@@ -97,13 +98,29 @@ function StudioEditableXBlockMixin(runtime, element) {
                     if (this.alt == imageUrl) this.classList.add('active')
                 })
             } else {
-                var $img = $preview.find('.value')
-                if ($img.length) $img.attr('src', imageUrl)
-                else $preview.prepend('<img class="value" src="' + imageUrl + '">')
+                $(
+                    '<div class="option-wrapper">' +
+                        '<img class="option active" src="' + imageUrl + '" alt="' + imageUrl + '" />' +
+                        '<i class="icon icon--active fa-solid fa-circle-check"></i>' +
+                        '<i class="icon icon--inactive fa-solid fa-circle-minus"></i>' +
+                    '</div>'
+                ).appendTo($preview).find('.icon--inactive').on('click', handleOptionInactivate)
             }
         }
 
         renderFieldValuePreview($field.data('value'))
+
+        $preview.find('.icon--inactive').on('click', handleOptionInactivate)
+
+        function handleOptionInactivate () {
+            this.parentElement.remove()
+        }
+
+        function setFieldValue (value) {
+            $field.val(undefined).change()
+            $field.data('value', value)
+            renderFieldValuePreview(value)
+        }
     });
 
     $(element).find('#alert-field-close').bind('click', function () {
@@ -281,12 +298,20 @@ function StudioEditableXBlockMixin(runtime, element) {
 
         var values = {};
         var notSet = []; // List of field names that should be set to default values
-        const fileForm = new FormData()
+        var fileForm = new FormData()
         for (var i in fields) {
             var field = fields[i];
 
-            if (field.file) {
-                const file = field.file();
+            if (field.files && field.files().length) {
+                var files = field.files()
+                for (var j in files) {
+                    fileForm.append(field.name + 's[]', files[j])
+                }
+                if (field.isSet()) {
+                    fileForm.append(field.name, field.val())
+                }
+            } else if (field.file) {
+                var file = field.file()
                 if (file) {
                     fileForm.append(field.name, file)
                 } else if (field.isSet()) {
@@ -308,7 +333,9 @@ function StudioEditableXBlockMixin(runtime, element) {
         }
 
         if (Array.from(fileForm.entries()).length > 0) {
-            upload_files(fileForm, () => studio_submit({values, defaults: notSet}))
+            upload_files(fileForm, function () {
+                studio_submit({values, defaults: notSet})
+            })
         } else {
             studio_submit({values, defaults: notSet})
         }

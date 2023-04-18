@@ -137,6 +137,13 @@
                 <div class="option-wrapper">
                     <img class="option" src="{{ optional_value }}" alt="{{ optional_value }}" />
                     <i class="icon icon--active fa-solid fa-circle-check"></i>
+                </div>
+              {% endfor %}
+
+              {% for optional_value in field.cover_images %}
+                <div class="option-wrapper">
+                    <img class="option option-input" src="{{ optional_value }}" alt="{{ optional_value }}" />
+                    <i class="icon icon--active fa-solid fa-circle-check"></i>
                     <i class="icon icon--inactive fa-solid fa-circle-minus"></i>
                 </div>
               {% endfor %}
