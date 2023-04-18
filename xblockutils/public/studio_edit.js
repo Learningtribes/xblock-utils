@@ -40,7 +40,7 @@ function StudioEditableXBlockMixin(runtime, element) {
                 })
             },
         });
-        $field.bind("change input paste", function () {
+        $field.bind("change", function () {
             // Field value has been modified:
             $wrapper.addClass('is-set');
             $resetButton.removeClass('inactive').addClass('active');
@@ -57,7 +57,9 @@ function StudioEditableXBlockMixin(runtime, element) {
             }
 
             if (this.accept && this.accept.startsWith('image/') && file) {
-                renderFieldValuePreview(URL.createObjectURL(file))
+                var value = URL.createObjectURL(file)
+                $field.data('value', value)
+                renderFieldValuePreview(value)
             }
         });
         $resetButton.click(function () {
@@ -98,13 +100,19 @@ function StudioEditableXBlockMixin(runtime, element) {
                     if (this.alt == imageUrl) this.classList.add('active')
                 })
             } else {
-                $(
+                var $option = $(
                     '<div class="option-wrapper">' +
                         '<img class="option active" src="' + imageUrl + '" alt="' + imageUrl + '" />' +
                         '<i class="icon icon--active fa-solid fa-circle-check"></i>' +
                         '<i class="icon icon--inactive fa-solid fa-circle-minus"></i>' +
                     '</div>'
-                ).appendTo($preview).find('.icon--inactive').on('click', handleOptionInactivate)
+                ).appendTo($preview)
+                $option.find('.option').on('click', function () {
+                    $wrapper.addClass('is-set')
+                    $resetButton.addClass('active').removeClass('inactive')
+                    setFieldValue(this.alt)
+                })
+                $option.find('.icon--inactive').on('click', handleOptionInactivate)
             }
         }
 
