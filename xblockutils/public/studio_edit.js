@@ -102,7 +102,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             } else {
                 var $option = $(
                     '<div class="option-wrapper">' +
-                        '<img class="option active" src="' + imageUrl + '" alt="' + imageUrl + '" />' +
+                        '<img class="option option-input active" src="' + imageUrl + '" alt="' + imageUrl + '" />' +
                         '<i class="icon icon--active fa-solid fa-circle-check"></i>' +
                         '<i class="icon icon--inactive fa-solid fa-circle-minus"></i>' +
                     '</div>'
