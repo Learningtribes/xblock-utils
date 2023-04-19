@@ -35,9 +35,19 @@ function StudioEditableXBlockMixin(runtime, element) {
                 return $field.prop('files')[0]
             },
             files: function () {
-                return Array.from($wrapper[0].querySelectorAll('.option-input')).map(function ($option) {
-                    return $option.src
-                })
+                return Promise.all(
+                    Array.from($wrapper[0].querySelectorAll('.option-input')).map(function ($option) {
+                        if ($option.src.startsWith('blob:')) {
+                            return fetch($option.src)
+                                .then(function (response) {return response.blob()})
+                                .then(function (blob) {
+                                    var filename = $option.src.split('/').pop() + '.' + blob.type.split('/').pop()
+                                    return new File([blob], filename, {type: blob.type})
+                                })
+                        }
+                        return $option.src
+                    })
+                )
             },
         });
         $field.bind("change", function () {
@@ -300,7 +310,7 @@ function StudioEditableXBlockMixin(runtime, element) {
     $(window).on('dragover', function(e) {e.preventDefault();});
     $(window).on('drop', function(e) {e.preventDefault();});
 
-    $('.save-button', element).bind('click', function (e) {
+    $('.save-button', element).bind('click', async function (e) {
         e.preventDefault();
         runtime.notify('save', {state: 'start', message: gettext("Saving")});
 
@@ -309,14 +319,15 @@ function StudioEditableXBlockMixin(runtime, element) {
         var fileForm = new FormData()
         for (var i in fields) {
             var field = fields[i];
+            var files = field.files && await field.files()
 
-            if (field.files && field.files().length) {
+            if (files) {
                 var files = field.files()
                 for (var j in files) {
                     fileForm.append(field.name + 's[]', files[j])
                 }
                 if (field.isSet()) {
-                    fileForm.append(field.name, field.val())
+                    fileForm.append(field.name, field.data('value'))
                 }
             } else if (field.file) {
                 var file = field.file()
