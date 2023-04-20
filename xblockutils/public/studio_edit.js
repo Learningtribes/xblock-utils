@@ -40,7 +40,7 @@ function StudioEditableXBlockMixin(runtime, element) {
                         return fetch($option.src)
                             .then(function (response) {return response.blob()})
                             .then(function (blob) {
-                                var filename = $option.src.split('/').pop() + '.' + blob.type.split('/').pop()
+                                var filename = $option.src.startsWith('blob') ? ($option.src.split('-').pop() + '.' + blob.type.split('/').pop()) : $option.src.split('@').pop()
                                 return new File([blob], filename, {type: blob.type})
                             })
                     })
