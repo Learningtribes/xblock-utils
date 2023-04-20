@@ -133,12 +133,10 @@
             <div class="setting-preview">
               <!-- <img class="value" src="{{ field.value }}" alt="{{ field.name|safe }}" /> -->
 
-              {% for optional_value in field.values %}
                 <div class="option-wrapper">
-                    <img class="option" src="{{ optional_value }}" alt="{{ optional_value }}" />
+                    <img class="option" src="{{ field.default }}" alt="{{ field.default }}" />
                     <i class="icon icon--active fa-solid fa-circle-check"></i>
                 </div>
-              {% endfor %}
 
               {% for optional_value in field.optional_values %}
                 <div class="option-wrapper">

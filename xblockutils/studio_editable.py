@@ -152,7 +152,6 @@ class StudioEditableXBlockMixin(object):
             info['is_set'] = False
             info['accept'] = field.accept
             info['extra_description'] = field.extra_description
-            info['values'] = field.values
             info['optional_values'] = []
             if self.fields.get(field_name + 's', None):
                 info['optional_values'] = self.fields[field_name + 's'].read_from(self)
