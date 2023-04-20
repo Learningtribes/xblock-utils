@@ -37,15 +37,12 @@ function StudioEditableXBlockMixin(runtime, element) {
             files: function () {
                 return Promise.all(
                     Array.from($wrapper[0].querySelectorAll('.option-input')).map(function ($option) {
-                        if ($option.src.startsWith('blob:')) {
-                            return fetch($option.src)
-                                .then(function (response) {return response.blob()})
-                                .then(function (blob) {
-                                    var filename = $option.src.split('/').pop() + '.' + blob.type.split('/').pop()
-                                    return new File([blob], filename, {type: blob.type})
-                                })
-                        }
-                        return $option.src
+                        return fetch($option.src)
+                            .then(function (response) {return response.blob()})
+                            .then(function (blob) {
+                                var filename = $option.src.split('/').pop() + '.' + blob.type.split('/').pop()
+                                return new File([blob], filename, {type: blob.type})
+                            })
                     })
                 )
             },
@@ -321,13 +318,12 @@ function StudioEditableXBlockMixin(runtime, element) {
             var field = fields[i];
             var files = field.files && await field.files()
 
-            if (files) {
-                var files = field.files()
+            if (files && files.length) {
                 for (var j in files) {
                     fileForm.append(field.name + 's[]', files[j])
                 }
                 if (field.isSet()) {
-                    fileForm.append(field.name, field.data('value'))
+                    fileForm.append(field.name, field.val())
                 }
             } else if (field.file) {
                 var file = field.file()
