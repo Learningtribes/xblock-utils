@@ -4,26 +4,23 @@ function StudioEditableXBlockMixin(runtime, element) {
     function doNothing(attr) {
         return
     }
-    var gettext = doNothing;
-    var Learningtribes = doNothing;
+    var gettext = window.gettext || function (t) {return t};
+    var LearningTribes = window.LearningTribes || {};
     if(!runtime.notify){
         runtime.notify = doNothing;
     }
-    var fileFields = [];
     var fields = [];
     var tinyMceAvailable = (typeof $.fn.tinymce !== 'undefined'); // Studio includes a copy of tinyMCE and its jQuery plugin
     var datepickerAvailable = (typeof $.fn.datepicker !== 'undefined'); // Studio includes datepicker jQuery plugin
-    if (window.gettext){
-        gettext = window.gettext;
-    }
-    if (window.Learningtribes){
-        Learningtribes = window.Learningtribes;
-    }
+
     $(element).find('.field-file-control').each(function () {
         var $field = $(this);
         var $wrapper = $field.closest('li');
         var $resetButton = $wrapper.find('button.setting-clear');
-        fileFields.push({
+        var $preview = $wrapper.find('.setting-preview')
+        var $info = $wrapper.find('.info')
+
+        fields.push({
             name: $wrapper.data('field-name'),
             isSet: function () {
                 return $wrapper.hasClass('is-set');
@@ -32,29 +29,113 @@ function StudioEditableXBlockMixin(runtime, element) {
                 return false;
             },
             val: function () {
-                return $field.prop('files')[0];
+                return $field.data('value')
+            },
+            file: function () {
+                return $field.prop('files')[0]
+            },
+            files: function () {
+                return Promise.all(
+                    Array.from($wrapper[0].querySelectorAll('.option-input')).map(function ($option) {
+                        return fetch($option.src)
+                            .then(function (response) {return response.blob()})
+                            .then(function (blob) {
+                                var filename = $option.src.startsWith('blob') ? ($option.src.split('-').pop() + '.' + blob.type.split('/').pop()) : $option.src.split('@').pop()
+                                return new File([blob], filename, {type: blob.type})
+                            })
+                    })
+                )
             },
         });
-        var fieldChanged = function () {
+        $field.bind("change", function () {
             // Field value has been modified:
             $wrapper.addClass('is-set');
             $resetButton.removeClass('inactive').addClass('active');
+            var file = this.files && this.files[0]
+            $info.text(file ? file.name : '');
 
-            if (this.id == 'xb-field-edit-scorm_pkg' && this.files) {
-                var fileSize = this.files[0].size;
-                if(fileSize > 300 * 1024 * 1024) {
+            if (this.id == 'xb-field-edit-scorm_pkg' && file) {
+                var fileSize = file.size;
+                if (fileSize > 300 * 1024 * 1024) {
                     $('#alert-field-file').removeClass('hidden');
+                } else {
+                    $('#alert-field-file').addClass('hidden')
                 }
             }
-        };
-        $field.bind("change input paste", fieldChanged);
+
+            if (this.accept && this.accept.startsWith('image/') && file) {
+                var value = URL.createObjectURL(file)
+                $field.data('value', value)
+                renderFieldValuePreview(value)
+            }
+        });
         $resetButton.click(function () {
-            $field.val($wrapper.attr('data-default')); // Use attr instead of data to force treating the default value as a string
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
             $('#alert-field-file').addClass('hidden');
+            $info.text('');
+            $preview.find('.option').removeClass('active')
+            setFieldValue($wrapper.attr('data-default'))
         });
-        $field.parent().on('drop', fieldChanged)
+
+        $field.parent().on('allowDrop', function (e) {e.preventDefault()})
+        $field.parent().on('drag', function (e) {e.dataTransfer.setData("text", e.target.id)})
+        $field.parent().on('drop', function (e) {
+            e.preventDefault();
+            $field.prop('files', e.originalEvent.dataTransfer.files).change();
+            $info.text((e.originalEvent.dataTransfer.files[0] || {}).name || '');
+        })
+
+        $preview.find('.option').on('click', function () {
+            $wrapper.addClass('is-set')
+            $resetButton.addClass('active').removeClass('inactive')
+            setFieldValue(this.alt)
+        })
+
+        function renderFieldValuePreview (imageUrl) {
+            if (!imageUrl) return
+
+            var $options = $preview.find('.option')
+            var optionUrls = Array.from($options).map(function ($option) {return $option.alt})
+
+            $options.each(function () {
+                this.classList.remove('active')
+            })
+
+            if (optionUrls.includes(imageUrl)) {
+                $options.each(function () {
+                    if (this.alt == imageUrl) this.classList.add('active')
+                })
+            } else {
+                var $option = $(
+                    '<div class="option-wrapper">' +
+                        '<img class="option option-input active" src="' + imageUrl + '" alt="' + imageUrl + '" />' +
+                        '<i class="icon icon--active fa-solid fa-circle-check"></i>' +
+                        '<i class="icon icon--inactive fa-solid fa-circle-minus"></i>' +
+                    '</div>'
+                ).appendTo($preview)
+                $option.find('.option').on('click', function () {
+                    $wrapper.addClass('is-set')
+                    $resetButton.addClass('active').removeClass('inactive')
+                    setFieldValue(this.alt)
+                })
+                $option.find('.icon--inactive').on('click', handleOptionInactivate)
+            }
+        }
+
+        renderFieldValuePreview($field.data('value'))
+
+        $preview.find('.icon--inactive').on('click', handleOptionInactivate)
+
+        function handleOptionInactivate () {
+            this.parentElement.remove()
+        }
+
+        function setFieldValue (value) {
+            $field.val(undefined).change()
+            $field.data('value', value)
+            renderFieldValuePreview(value)
+        }
     });
 
     $(element).find('#alert-field-close').bind('click', function () {
@@ -220,71 +301,59 @@ function StudioEditableXBlockMixin(runtime, element) {
             cache: false,
             contentType: false,
             processData: false,
-
         }).done(success).fail(ajaxFail);
     };
 
-    //quick fixing, it should rewrite in a better way
-    var preventDefault = function(event) {
-        event.preventDefault();
-    };
-    $(window).on('dragover', preventDefault);
-    $(window).on('drop', preventDefault);
+    $(window).on('dragover', function(e) {e.preventDefault();});
+    $(window).on('drop', function(e) {e.preventDefault();});
 
-    var $fileControl = $('.field-file-control-wrapper', element)
-    $fileControl.on('allowDrop', function(ev){
-        ev.preventDefault();
-    })
-    $fileControl.on('drag', function(ev){
-        ev.dataTransfer.setData("text", ev.target.id);
-    })
-    $fileControl.on('drop', function(ev){
-        ev.preventDefault();
-        var $file = $fileControl.find('input[type=file]')
-        $file[0].files = ev.originalEvent.dataTransfer.files
-        var fileInstance0 = $file[0].files[0]
-        var selectedFile = fileInstance0 || null;
-        $('.info',element).text(selectedFile.name);
-    })
-    //quick fixing end
-
-
-    $('.save-button', element).bind('click', function (e) {
+    $('.save-button', element).bind('click', async function (e) {
         e.preventDefault();
         runtime.notify('save', {state: 'start', message: gettext("Saving")});
 
         var values = {};
         var notSet = []; // List of field names that should be set to default values
+        var fileForm = new FormData()
         for (var i in fields) {
             var field = fields[i];
-            if (field.isSet()) {
-                values[field.name] = field.val();
+            var files = field.files && await field.files()
+
+            if (files && files.length) {
+                for (var j in files) {
+                    fileForm.append(field.name + 's[]', files[j])
+                }
+                if (field.isSet()) {
+                    fileForm.append(field.name, field.val())
+                }
+            } else if (field.file) {
+                var file = field.file()
+                if (file) {
+                    fileForm.append(field.name, file)
+                } else if (field.isSet()) {
+                    values[field.name] = field.val()
+                }
             } else {
-                notSet.push(field.name);
+                if (field.isSet()) {
+                    values[field.name] = field.val()
+                } else {
+                    notSet.push(field.name)
+                }
             }
+
             // Remove TinyMCE instances to make sure jQuery does not try to access stale instances
             // when loading editor for another block:
             if (field.hasEditor()) {
                 field.removeEditor();
             }
         }
-        if(fileFields.length > 0) {
-            var form = new FormData();
-            for (var i in fileFields) {
-                var field = fileFields[i];
-                if (field.isSet()) {
-                    form.append(field.name, field.val())
-                }
-            }
-            if (Array.from(form.entries()).length > 0) {
-                upload_files(form, function () {
-                    studio_submit({values: values, defaults: notSet});
-                });
-                return
-            }
-        }
-        studio_submit({values: values, defaults: notSet});
 
+        if (Array.from(fileForm.entries()).length > 0) {
+            upload_files(fileForm, function () {
+                studio_submit({values, defaults: notSet})
+            })
+        } else {
+            studio_submit({values, defaults: notSet})
+        }
     });
 
     var $element = $(element);
@@ -301,10 +370,6 @@ function StudioEditableXBlockMixin(runtime, element) {
         runtime.notify('cancel', {});
     });
 
-    $element.find('[data-field-name=scorm_pkg] input[type=file]').on('change', function(e){
-        var selectedFile = e.target.files[0] || null;
-        $(e.currentTarget).siblings('.info').text(selectedFile.name);
-    })
     if (LearningTribes && LearningTribes.QuestionMark) {
         var $wrappers = $('.wrapper-comp-settings .question-mark-wrapper')
         $wrappers.each(function(i, wrapper){
@@ -315,11 +380,11 @@ function StudioEditableXBlockMixin(runtime, element) {
     function renderSwithcher(wrapper) {
         var $select = $(wrapper).prev();
         new LearningTribes.Switcher(wrapper, $select.find('option:selected').val() === '1' ? 'true' : 'false',
-            function(checked){
-            var checkedStr = checked ? '1' : '0';
-            $select.find('option').removeAttr('selected')
-            $select.find('option[value='+checkedStr+']')
-                .attr('selected', 'selected')
+            function (checked) {
+                var checkedStr = checked ? '1' : '0';
+                $select.find('option').removeAttr('selected')
+                $select.find('option[value='+checkedStr+']').attr('selected', 'selected')
+                $select.closest('.comp-setting-entry').attr('data-value', checked ? 'true' : 'false')
             }
         )
         var $li = $select.closest('.field')
