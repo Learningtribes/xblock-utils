@@ -48,12 +48,7 @@
                 {% endfor %}
               </select>
             {% elif field.type == "string" or field.type == "datepicker" %}
-                 {% if field.runtime_options.get('readonly', False) %}
-                    {% set readonly = True %}
-                {% else %}
-                    {% set readonly = False %}
-                {% endif %}
-                {% if readonly %}
+                {% if 'readonly' in field.runtime_options %}
                 <span class="setting-text">{{ field.value }}</span>
                 {% else %}
                 <input
