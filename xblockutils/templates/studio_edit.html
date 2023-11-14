@@ -13,7 +13,7 @@
           <div class="wrapper-comp-setting{% if field.type == "set" %} metadata-list-enum {%endif%}">
             {% if field.type == "file" %}
               <div class="alert-field alert-error hidden" id="alert-field-file" role="alert">
-                  <div class="alert-dialog">
+                  <div class="alert-dia``log">
                       <span class="alert-dialog-text alert-error-text" id="alert-error-text">
                         {% blocktrans with limit="300" %}SCORM module exceeds maximum size of {{ limit }} MB.{% endblocktrans %}
                       </span>
@@ -48,10 +48,9 @@
                 {% endfor %}
               </select>
             {% elif field.type == "string" or field.type == "datepicker" %}
-                {% if 'readonly' in field.runtime_options %}
+                {% if field.is_readonly %}
                 <span class="setting-text">{{ field.value }}</span>
                 {% else %}
-                {{ field.runtime_options|safe }}
                 <input
                     type="text"
                     class="field-data-control"
