@@ -129,7 +129,7 @@ class StudioEditableXBlockMixin(object):
             'allow_reset': field.runtime_options.get('resettable_editor', True),
             'list_values': None,  # Only available for List fields
             'has_list_values': False,  # True if list_values_provider exists, even if it returned no available options
-            'is_readonly': field.runtime_options.get('readonly', False),
+            'is_readonly': field.runtime_options.get('readonly', False),  # True: make String field readonly 
         }
         for type_class, type_name in supported_field_types:
             if isinstance(field, type_class):
