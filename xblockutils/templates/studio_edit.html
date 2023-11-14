@@ -13,7 +13,7 @@
           <div class="wrapper-comp-setting{% if field.type == "set" %} metadata-list-enum {%endif%}">
             {% if field.type == "file" %}
               <div class="alert-field alert-error hidden" id="alert-field-file" role="alert">
-                  <div class="alert-dia``log">
+                  <div class="alert-dialog">
                       <span class="alert-dialog-text alert-error-text" id="alert-error-text">
                         {% blocktrans with limit="300" %}SCORM module exceeds maximum size of {{ limit }} MB.{% endblocktrans %}
                       </span>
