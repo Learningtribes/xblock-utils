@@ -48,10 +48,10 @@
                 {% endfor %}
               </select>
             {% elif field.type == "string" or field.type == "datepicker" %}
-                {{ field.runtime_options }}
                 {% if 'readonly' in field.runtime_options %}
                 <span class="setting-text">{{ field.value }}</span>
                 {% else %}
+                {{ field.runtime_options|safe }}
                 <input
                     type="text"
                     class="field-data-control"
