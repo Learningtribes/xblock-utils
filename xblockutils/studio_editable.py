@@ -126,7 +126,6 @@ class StudioEditableXBlockMixin(object):
             'value': field.read_from(self),
             'has_values': False,
             'help': ugettext(field.help) if field.help else "",
-            'extra_description': ugettext(field.runtime_options.get('extra_description', '')),
             'allow_reset': field.runtime_options.get('resettable_editor', True),
             'list_values': None,  # Only available for List fields
             'has_list_values': False,  # True if list_values_provider exists, even if it returned no available options
@@ -153,7 +152,7 @@ class StudioEditableXBlockMixin(object):
         if info['type'] == 'file':
             info['is_set'] = False
             info['accept'] = field.accept
-            info['extra_description'] = field.extra_description
+            info['extra_description'] = ugettext(field.extra_description)
             info['optional_values'] = []
             if self.fields.get(field_name + 's', None):
                 info['optional_values'] = self.fields[field_name + 's'].read_from(self)
