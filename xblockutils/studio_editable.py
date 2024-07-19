@@ -126,6 +126,7 @@ class StudioEditableXBlockMixin(object):
             'value': field.read_from(self),
             'has_values': False,
             'help': ugettext(field.help) if field.help else "",
+            'extra_description': ugettext(field.extra_description) if field.extra_description else "",
             'allow_reset': field.runtime_options.get('resettable_editor', True),
             'list_values': None,  # Only available for List fields
             'has_list_values': False,  # True if list_values_provider exists, even if it returned no available options
