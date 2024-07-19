@@ -56,10 +56,12 @@ function StudioEditableXBlockMixin(runtime, element) {
 
             if (this.id == 'xb-field-edit-scorm_pkg' && file) {
                 var fileSize = file.size;
-                if (fileSize > 300 * 1024 * 1024) {
-                    $('#alert-field-file').removeClass('hidden');
-                } else {
-                    $('#alert-field-file').addClass('hidden')
+                if (fileSize > 800 * 1024 * 1024) {
+                    LearningTribes.Notification.Error({
+                        title: gettext("Studio's having trouble saving your work"),
+                        closeIcon: true,
+                        message: gettext("Your file is too large.")
+                    });
                 }
             }
 
