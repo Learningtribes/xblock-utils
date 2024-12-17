@@ -303,7 +303,8 @@ function StudioEditableXBlockMixin(runtime, element) {
             cache: false,
             contentType: false,
             processData: false,
-        }).done(success).fail(ajaxFail);
+        }).then(success)
+        .fail(ajaxFail);
     };
 
     $(window).on('dragover', function(e) {e.preventDefault();});
