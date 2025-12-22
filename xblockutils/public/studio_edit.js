@@ -288,7 +288,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             dataType: "json",
             global: false,  // Disable Studio's error handling that conflicts with studio's notify('save') and notify('cancel') :-/
             success: function (response) {
-                runtime.notify('save', {state: 'end'});
+                runtime.notify('save', {state: 'end', element: element});
             }
         }).fail(ajaxFail);
     };
