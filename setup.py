@@ -89,7 +89,7 @@ setup(
         'Mako',
         'futures==3.2.0',
         'jsonschema==2.6.0',
-        'lxml==3.8.0',
+        'lxml==4.9.1',
         'web-fragments==0.2.2',
     ],
     package_data=package_data("xblockutils", ["public", "templates", "templatetags"]),
